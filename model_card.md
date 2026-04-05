@@ -8,7 +8,9 @@
 
 ## 2. Intended Use
 
-This recommender suggests 3–5 songs from a small catalog based on a user's preferred genre, mood, energy level, and production style (acoustic vs. electronic). It is a classroom simulation designed to illustrate how content-based filtering works — it is not intended for real users or production deployment.
+**Intended use:** This recommender suggests 3–5 songs from a small catalog based on a user's preferred genre, mood, energy level, and production style (acoustic vs. electronic). It is a classroom simulation designed to illustrate how content-based filtering works.
+
+**Non-intended use:** This system should not be used to make real music recommendations to actual users. The catalog is too small (20 songs), the feature values are hand-assigned (not derived from audio analysis), and the weights are not validated against real listening behavior. It should not be used to draw conclusions about real listeners' tastes, to evaluate artists or songs for commercial purposes, or as a component in any user-facing product.
 
 ---
 
@@ -84,6 +86,10 @@ Most genres have only 1 song; lofi and pop have 2–3. The dataset reflects a We
 
 ## 9. Personal Reflection
 
-Building this recommender made the "why" behind Spotify's Discover Weekly much more concrete. A simple weighted formula can produce surprisingly good results for clear-cut profiles, but it breaks down quickly with conflicting preferences or underrepresented genres. The biggest surprise was the "Conflicted: High Energy + Sad" profile — it exposed that my mood labels carry implicit energy assumptions (sad = slow), which is a form of bias baked into the data itself, not the algorithm.
+**Biggest learning moment:** The "Conflicted: High Energy + Sad" profile was the turning point. It exposed that my mood labels carry implicit energy assumptions (sad = slow), which is a form of bias baked into the data itself, not the algorithm. The system wasn't broken — the data was making promises it couldn't keep. That distinction between algorithmic bias and data bias was something I hadn't thought about before.
 
-The weight experiment showed that there is no single "correct" set of weights — the right balance depends on what the user cares about in that moment. Real systems solve this by learning personalized weights over time, which is something a static scoring formula can never do. It made me realize that the hardest part of recommendation isn't the math; it's deciding what "good" means for each individual listener.
+**How AI tools helped — and where I double-checked:** AI was most useful for scaffolding — generating the initial CSV expansion, suggesting the proximity formula, and drafting boilerplate. But I had to verify the math myself: the first suggested weights didn't sum to 1.0, and the initial scoring formula didn't handle the `likes_acoustic` boolean flip correctly. AI accelerates the "getting started" phase but can't replace understanding your own logic. I also had to manually design the adversarial profiles — the AI suggested edge cases, but deciding *which* ones would actually stress the system required understanding the scoring formula's weak points.
+
+**What surprised me about simple algorithms:** A weighted sum with 6 features and hand-tuned weights produced recommendations that genuinely "felt right" for 4 out of 6 profiles. Sunrise City for pop/happy, Library Rain for chill lofi, Storm Runner for intense rock — these weren't random; they matched my musical intuition. The surprise is that recommendation doesn't require deep learning or massive datasets to be useful. The formula is just multiplication and addition, yet it captures something real about how musical "vibe" works.
+
+**What I'd try next:** I'd add a genre similarity matrix so that "indie pop" partially matches "pop," implement multi-context profiles so a single user can have different preferences for different activities, and expand the catalog to at least 100 songs to reduce the one-song-per-genre bottleneck. I'd also want to add a feedback loop — let the user thumbs-up or thumbs-down recommendations and adjust weights automatically, moving from a static formula toward something that actually learns.
