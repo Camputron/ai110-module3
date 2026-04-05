@@ -99,7 +99,7 @@ Each `UserProfile` stores four preference signals:
 
 Below is a screenshot of the recommender running with the default pop/happy user profile:
 
-![CLI recommendations output](assets/recommendations.png)
+![CLI recommendations output](assets/phase3.png)
 
 ---
 
@@ -140,144 +140,43 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+Below is a recording of all 6 user profiles running through the recommender:
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+![All profile recommendations](assets/phase4.gif)
+
+### Weight Shift: Genre halved (0.25 to 0.125), Energy doubled (0.20 to 0.40)
+
+Key observations from the experiment:
+
+- **High-Energy Pop profile:** Fuego Lento (latin, happy) jumped from #3 to #2, overtaking Gym Hero (pop, intense). With genre worth less, the perfect energy match (1.00) mattered more than pop loyalty. This made recommendations feel more "activity-based" — good for a workout playlist, but less genre-coherent.
+- **Deep Intense Rock profile:** Gym Hero (pop) closed the gap with Storm Runner (rock) significantly — from a 0.20 gap down to 0.08. The genre wall between pop and rock was nearly erased.
+- **Conflicted profile (blues, sad, energy 0.9):** Broken Strings stayed #1 but its lead shrank. High-energy songs from unrelated genres (Gym Hero, Fuego Lento) climbed into the top 5, pulled by the doubled energy weight. The system was "torn" between genre/mood loyalty and the energy target.
+
+**Conclusion:** The original weights favor genre-coherent recommendations. The experimental weights favor energy-coherent recommendations. Neither is objectively better — it depends on whether the user cares more about *what kind* of music they hear or *how it feels*.
+
+### Profile Comparisons
+
+- **High-Energy Pop vs. Chill Lofi:** These two profiles share zero overlap in their top 5. The pop profile gets Sunrise City (0.96) and Gym Hero (0.76); the lofi profile gets Library Rain (0.93) and Midnight Coding (0.91). This confirms the system can cleanly separate high-energy upbeat listeners from low-energy mellow listeners — the 4 preference axes (genre, mood, energy, acoustic) provide enough separation.
+- **Deep Intense Rock vs. High-Energy Pop:** Both profiles have high energy targets (0.9 and 0.8), yet their top results barely overlap. Storm Runner (#1 for rock) doesn't appear in pop's top 5, and Sunrise City (#1 for pop) drops to #4 for rock. Genre is the differentiator here — without it, these profiles would converge on the same high-energy songs.
+- **Middle of the Road vs. Chill Lofi:** The R&B profile (energy 0.5) and lofi profile (energy 0.4) are only 0.1 apart on energy, yet produce completely different top 5 lists. Genre and mood do the heavy lifting — the system doesn't just sort by energy.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+- **Tiny catalog (20 songs):** Most genres have only one representative, so there is zero within-genre variety. A blues fan always gets Broken Strings at #1.
+- **Binary categorical matching:** "Indie pop" and "pop" score 0 similarity. There is no concept of genre distance, so near-misses are penalized as harshly as total mismatches.
+- **Mood labels carry energy assumptions:** "Sad" is paired with low energy (blues, 0.48) in the data, but intense sad music exists (dark electronic, heavy emo). The system can't find what isn't labeled.
+- **Single-preference profile:** Users with mixed or contextual tastes (chill lofi for studying, metal for the gym) can only be served one context at a time.
+- **No lyric, language, or cultural understanding:** The system treats songs as numeric vectors. It doesn't know that "Coffee Shop Stories" is in English or that "Fuego Lento" implies a Spanish-language track.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+Recommenders turn data into predictions by reducing each song and user to a set of comparable numbers, then using a distance or similarity formula to rank every option. The scoring formula is deceptively simple — multiply, subtract, add — but the *weights* control everything. Doubling energy's weight completely reshuffled rankings even though the underlying data didn't change. This means whoever chooses the weights has enormous power over what users see, which is an invisible form of editorial control.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
----
-
-## 7. `model_card_template.md`
-
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
-
-```markdown
-# 🎧 Model Card - Music Recommender Simulation
-
-## 1. Model Name
-
-Give your recommender a name, for example:
-
-> VibeFinder 1.0
-
----
-
-## 2. Intended Use
-
-- What is this system trying to do
-- Who is it for
-
-Example:
-
-> This model suggests 3 to 5 songs from a small catalog based on a user's preferred genre, mood, and energy level. It is for classroom exploration only, not for real users.
-
----
-
-## 3. How It Works (Short Explanation)
-
-Describe your scoring logic in plain language.
-
-- What features of each song does it consider
-- What information about the user does it use
-- How does it turn those into a number
-
-Try to avoid code in this section, treat it like an explanation to a non programmer.
-
----
-
-## 4. Data
-
-Describe your dataset.
-
-- How many songs are in `data/songs.csv`
-- Did you add or remove any songs
-- What kinds of genres or moods are represented
-- Whose taste does this data mostly reflect
-
----
-
-## 5. Strengths
-
-Where does your recommender work well
-
-You can think about:
-- Situations where the top results "felt right"
-- Particular user profiles it served well
-- Simplicity or transparency benefits
-
----
-
-## 6. Limitations and Bias
-
-Where does your recommender struggle
-
-Some prompts:
-- Does it ignore some genres or moods
-- Does it treat all users as if they have the same taste shape
-- Is it biased toward high energy or one genre by default
-- How could this be unfair if used in a real product
-
----
-
-## 7. Evaluation
-
-How did you check your system
-
-Examples:
-- You tried multiple user profiles and wrote down whether the results matched your expectations
-- You compared your simulation to what a real app like Spotify or YouTube tends to recommend
-- You wrote tests for your scoring logic
-
-You do not need a numeric metric, but if you used one, explain what it measures.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender
-
-Examples:
-
-- Add support for multiple users and "group vibe" recommendations
-- Balance diversity of songs instead of always picking the closest match
-- Use more features, like tempo ranges or lyric themes
-
----
-
-## 9. Personal Reflection
-
-A few sentences about what you learned:
-
-- What surprised you about how your system behaved
-- How did building this change how you think about real music recommenders
-- Where do you think human judgment still matters, even if the model seems "smart"
+Bias shows up at multiple levels: in the data (which genres are represented, who assigned the mood labels), in the features (what gets measured and what doesn't), and in the weights (what the system prioritizes). The "Conflicted: High Energy + Sad" experiment was the clearest example — the system couldn't serve this user well not because the algorithm is broken, but because the dataset assumes sadness is quiet. In a real product with millions of users, these small assumptions scale into systematic blind spots that shape what entire communities of listeners are exposed to.
 
