@@ -107,34 +107,41 @@ Below is a screenshot of the recommender running with the default pop/happy user
 
 ### Setup
 
-1. Create a virtual environment (optional but recommended):
+1. Create and activate a virtual environment:
 
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
+   python3 -m venv env
+   source env/bin/activate      # Mac or Linux
+   env\Scripts\activate         # Windows
+   ```
 
-2. Install dependencies
+2. Install dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Run the app:
+3. Run the recommender (default **balanced** mode):
 
-```bash
-python -m src.main
-```
+   ```bash
+   python3 -m src.main
+   ```
+
+4. Run with a specific scoring mode:
+
+   ```bash
+   python3 -m src.main genre-first
+   python3 -m src.main mood-first
+   python3 -m src.main energy-focused
+   ```
+
+   Available modes: `balanced`, `genre-first`, `mood-first`, `energy-focused`.
 
 ### Running Tests
 
-Run the starter tests with:
-
 ```bash
-pytest
+PYTHONPATH=. pytest tests/test_recommender.py -v
 ```
-
-You can add more tests in `tests/test_recommender.py`.
 
 ---
 
